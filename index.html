@@ -1,1 +1,368 @@
-hello world
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Converter</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Cyberpunk themed colors and fonts */
+        :root {
+            --color-dark-bg: #1a1a2e; /* Deep dark blue/purple */
+            --color-card-bg: #0f0f1d; /* Even darker, almost black */
+            --color-neon-blue: #00f0ff; /* Electric blue */
+            --color-neon-pink: #ff007f; /* Shocking pink */
+            --color-text-light: #e0e0e0; /* Light gray for general text */
+            --color-border-dark: #3a3a5a; /* Dark border color */
+            --color-input-bg: #2a2a4a; /* Dark input background */
+            --color-error: #ff3366; /* Intense red for errors */
+        }
+
+        body {
+            font-family: 'Inter', monospace; /* Monospace for techy feel, Inter as fallback */
+            background-color: var(--color-dark-bg);
+            background-image: linear-gradient(135deg, #1a1a2e 0%, #0a0a1a 100%);
+            color: var(--color-text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border-dark);
+            border-radius: 0.75rem; /* Slightly rounded, but still sharp */
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), /* Neon blue glow */
+                        0 0 15px rgba(255, 0, 127, 0.1); /* Neon pink subtle glow */
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 480px; /* Slightly wider for a more substantial feel */
+            position: relative;
+            overflow: hidden; /* To contain pseudo-elements if added */
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--color-neon-blue), var(--color-neon-pink));
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0.3;
+            border-radius: 0.75rem;
+        }
+
+        h1 {
+            color: var(--color-neon-blue);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7); /* Stronger neon glow for heading */
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            color: var(--color-neon-pink);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
+        }
+
+        input {
+            background-color: var(--color-input-bg);
+            border: 1px solid var(--color-border-dark);
+            color: var(--color-neon-blue); /* Input text color */
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem; /* Rounded input */
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0, 240, 255, 0.1); /* Inner glow */
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-neon-blue);
+            box-shadow: 0 0 0 2px var(--color-neon-blue),
+                        inset 0 0 8px rgba(0, 240, 255, 0.3);
+        }
+        
+        input::placeholder {
+            color: rgba(0, 240, 255, 0.4); /* Faded neon placeholder */
+        }
+
+        button {
+            background: linear-gradient(90deg, var(--color-neon-blue), var(--color-neon-pink));
+            color: #fff;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5),
+                        0 0 8px rgba(255, 0, 127, 0.5); /* Button glow */
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.7),
+                        0 0 12px rgba(255, 0, 127, 0.7);
+        }
+
+        .result-box {
+            background-color: var(--color-input-bg);
+            border: 1px solid var(--color-border-dark);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        .result-box h2 {
+            color: var(--color-text-light);
+            margin-bottom: 0.75rem;
+        }
+
+        #resultText {
+            color: var(--color-neon-blue); /* Neon blue for the result */
+            font-size: 1.75rem; /* Slightly larger result text */
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+            word-break: break-all; /* Ensure long numbers wrap */
+        }
+
+        #errorMessage {
+            color: var(--color-error);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            text-shadow: 0 0 5px rgba(255, 51, 102, 0.5);
+        }
+
+        /* Styling for the SVG container */
+        #avatarSvgContainer {
+            margin-top: 1.5rem;
+            display: flex; /* Use flexbox to center the SVG */
+            justify-content: center;
+            align-items: center;
+        }
+
+        #pixelAvatarSvg {
+            width: 260px; /* Scale up for visibility */
+            height: 260px; /* Scale up for visibility */
+            max-width: 100%; /* Ensure responsiveness */
+            border: 1px solid var(--color-border-dark);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); /* Subtle glow around SVG */
+            background-color: #000; /* Default background for SVG */
+            /* For SVG, sharpness is inherent, no need for image-rendering pixelated */
+        }
+
+        .avatar-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed var(--color-border-dark); /* Divider */
+            text-align: center;
+        }
+
+        .avatar-section h2 {
+            color: var(--color-neon-pink);
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center">CYBERNETIC CONVERTER</h1>
+
+        <div class="mb-6">
+            <label for="inputText" class="block text-sm mb-2">
+                INPUT DATA STRING:
+            </label>
+            <input
+                type="text"
+                id="inputText"
+                class="block w-full"
+                placeholder=">>> PROCESS_STRING.EXE_ENTER_ALPHA_CODE"
+            />
+        </div>
+
+        <button id="convertButton" class="w-full">
+            PROCESS &gt;&gt; CONVERT
+        </button>
+
+        <div class="result-box">
+            <h2 class="text-xl font-semibold">OUTPUT:</h2>
+            <p id="resultText"></p>
+            <p id="errorMessage" class="hidden"></p>
+        </div>
+
+        <div class="avatar-section hidden" id="avatarSection">
+            <h2>AVATAR GENERATION:</h2>
+            <button id="generateAvatarButton" class="w-full">
+                GENERATE PIXEL AVATAR &gt;&gt;
+            </button>
+            <!-- Container for the SVG -->
+            <div id="avatarSvgContainer" class="hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputText = document.getElementById('inputText');
+            const convertButton = document.getElementById('convertButton');
+            const resultText = document.getElementById('resultText');
+            const errorMessage = document.getElementById('errorMessage');
+            const avatarSection = document.getElementById('avatarSection');
+            const generateAvatarButton = document.getElementById('generateAvatarButton');
+            const avatarSvgContainer = document.getElementById('avatarSvgContainer');
+
+            let currentNumberString = ''; // Store the last converted number string
+
+            // Function to handle displaying messages
+            function showMessage(message, type = 'info') {
+                if (type === 'error') {
+                    errorMessage.textContent = message;
+                    errorMessage.classList.remove('hidden');
+                    resultText.textContent = ''; // Clear result if there's an error
+                    avatarSection.classList.add('hidden'); // Hide avatar section on error
+                    avatarSvgContainer.classList.add('hidden'); // Hide SVG
+                } else {
+                    errorMessage.classList.add('hidden');
+                    resultText.textContent = message;
+                }
+            }
+
+            // The core translation logic
+            function alphabetToNumberString(inputString) {
+                if (typeof inputString !== 'string') {
+                    return null; // Indicates an invalid input type
+                }
+
+                const numberString = [];
+                let hasAlphabets = false;
+
+                for (let i = 0; i < inputString.length; i++) {
+                    const char = inputString[i];
+                    const lowerChar = char.toLowerCase();
+
+                    if (lowerChar >= 'a' && lowerChar <= 'z') {
+                        const number = lowerChar.charCodeAt(0) - 'a'.charCodeAt(0) + 1;
+                        numberString.push(String(number));
+                        hasAlphabets = true;
+                    }
+                }
+                if (!hasAlphabets && inputString.length > 0) {
+                  return "";
+                }
+                return numberString.join('');
+            }
+
+            // --- Avatar Generation Logic (now generates SVG) ---
+
+            // Function to generate a robust seed from the number string
+            function generateSeed(numberString) {
+                let seed = 0;
+                for (let i = 0; i < numberString.length; i++) {
+                    seed = (seed * 31 + parseInt(numberString[i], 10)) % 233280;
+                }
+                return seed === 0 && numberString.length > 0 ? 1 : seed;
+            }
+
+            // Simple Linear Congruential Generator (LCG) for pseudo-random numbers
+            function createSeededRandom(seed) {
+                let currentSeed = seed;
+                return function() {
+                    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+                    return currentSeed / 233280;
+                };
+            }
+
+            function generatePixelAvatarSvg(numberString) {
+                if (!numberString) {
+                    showMessage("ERROR: NO DATA FOR AVATAR GENERATION. CONVERT STRING FIRST.", 'error');
+                    return;
+                }
+
+                avatarSvgContainer.classList.remove('hidden'); // Show the SVG container
+
+                const PIXEL_SIZE = 1; // Each pixel is 1x1 unit in SVG coordinates
+                const GRID_SIZE = 13;
+
+                // Clear previous SVG if it exists
+                while (avatarSvgContainer.firstChild) {
+                    avatarSvgContainer.removeChild(avatarSvgContainer.firstChild);
+                }
+
+                // Create SVG element
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('id', 'pixelAvatarSvg');
+                svg.setAttribute('viewBox', `0 0 ${GRID_SIZE} ${GRID_SIZE}`); // Set viewBox to 13x13
+                svg.setAttribute('preserveAspectRatio', 'xMidYMid meet'); // Maintain aspect ratio
+                
+                // Add background rectangle to ensure consistent size and fill if needed
+                const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                bgRect.setAttribute('x', '0');
+                bgRect.setAttribute('y', '0');
+                bgRect.setAttribute('width', GRID_SIZE);
+                bgRect.setAttribute('height', GRID_SIZE);
+                bgRect.setAttribute('fill', '#000000'); // Default black background
+                svg.appendChild(bgRect);
+
+                const seed = generateSeed(numberString);
+                const random = createSeededRandom(seed);
+
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        const randomValue = random(); // Get a pseudo-random value between 0 and 1
+
+                        if (randomValue >= 0.5) { // 50% chance for white pixel
+                            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                            rect.setAttribute('x', x * PIXEL_SIZE);
+                            rect.setAttribute('y', y * PIXEL_SIZE);
+                            rect.setAttribute('width', PIXEL_SIZE);
+                            rect.setAttribute('height', PIXEL_SIZE);
+                            rect.setAttribute('fill', '#FFFFFF'); // White pixel
+                            svg.appendChild(rect);
+                        }
+                    }
+                }
+                avatarSvgContainer.appendChild(svg);
+            }
+
+            // --- Event Listeners ---
+            convertButton.addEventListener('click', () => {
+                const input = inputText.value;
+                const result = alphabetToNumberString(input);
+
+                if (result === null) {
+                    showMessage("ERROR: INVALID DATA INPUT. STRING REQUIRED.", 'error');
+                    currentNumberString = '';
+                    avatarSection.classList.add('hidden');
+                    avatarSvgContainer.classList.add('hidden');
+                } else if (result === "") {
+                    showMessage("WARNING: NO ALPHA-CHARACTERS DETECTED IN INPUT.", 'error');
+                    currentNumberString = '';
+                    avatarSection.classList.add('hidden');
+                    avatarSvgContainer.classList.add('hidden');
+                } else {
+                    showMessage(result, 'info');
+                    currentNumberString = result;
+                    avatarSection.classList.remove('hidden');
+                }
+            });
+
+            generateAvatarButton.addEventListener('click', () => {
+                generatePixelAvatarSvg(currentNumberString); // Call the SVG generation function
+            });
+
+            // Optional: Convert on Enter key press
+            inputText.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    convertButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
